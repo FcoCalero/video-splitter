@@ -87,7 +87,7 @@ def ceildiv(a, b):
     return int(math.ceil(a / float(b)))
 
 
-def split_by_seconds(filename, split_length, vcodec="copy", acodec="copy",
+def split_by_seconds(filename, folder, split_length, vcodec="copy", acodec="copy",
                      extra="", video_length=None, **kwargs):
     if split_length and split_length <= 0:
         print("Split length can't be 0")
@@ -113,9 +113,18 @@ def split_by_seconds(filename, split_length, vcodec="copy", acodec="copy",
         else:
             split_start = split_length * n
 
-        split_args += ["-ss", str(split_start), "-t", str(split_length),
-                       filebase + "-" + str(n + 1) + "-of-" +
-                       str(split_count) + "." + fileext]
+        if folder:
+          print("testing: " + folder)
+          print("filebase: " +  os.path.basename(filebase))
+          target = folder + os.path.basename(filebase)
+          print (target)
+          split_args += ["-ss", str(split_start), "-t", str(split_length),
+                         target + "-" + str(n + 1) + "-of-" +
+                         str(split_count) + "." + fileext]
+        else:
+          split_args += ["-ss", str(split_start), "-t", str(split_length),
+                         filebase + "-" + str(n + 1) + "-of-" +
+                         str(split_count) + "." + fileext]
         print("About to run: " + " ".join(split_cmd + split_args))
         subprocess.check_output(split_cmd + split_args)
 
@@ -123,6 +132,12 @@ def split_by_seconds(filename, split_length, vcodec="copy", acodec="copy",
 def main():
     parser = OptionParser()
 
+    parser.add_option("-o", "--out",
+                      dest="folder",
+                      help="Target folder to split, for example /target_path/",
+                      type="string",
+                      action="store"
+                      )
     parser.add_option("-f", "--file",
                       dest="filename",
                       help="File to split, for example sample.avi",
